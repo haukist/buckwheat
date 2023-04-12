@@ -50,8 +50,8 @@ val colorEditor
     @ReadOnlyComposable
     get() = combineColors(
         MaterialTheme.colorScheme.surface,
-        MaterialTheme.colorScheme.surfaceVariant,
-        0.56F,
+        MaterialTheme.colorScheme.primary,
+        0.05F,
     )
 
 val colorOnEditor
