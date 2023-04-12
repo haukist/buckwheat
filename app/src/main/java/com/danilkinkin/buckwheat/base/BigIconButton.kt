@@ -28,8 +28,8 @@ fun BigIconButton(
     icon: Painter,
     contentDescription: String?,
 ) {
-    val contentColor = contentColorFor(MaterialTheme.colorScheme.primaryContainer)
-    val disabledContentColor = contentColorFor(MaterialTheme.colorScheme.primaryContainer).copy(0.38f)
+    val contentColor = contentColorFor(MaterialTheme.colorScheme.surfaceVariant)
+    val disabledContentColor = contentColorFor(MaterialTheme.colorScheme.surfaceVariant).copy(0.38f)
 
     Box(
         modifier = modifier
@@ -48,7 +48,7 @@ fun BigIconButton(
         contentAlignment = Alignment.Center
     ) {
         Icon(
-            modifier = Modifier.size(32.dp),
+            modifier = Modifier.size(24.dp),
             painter = icon,
             tint = if (enabled) contentColor else disabledContentColor,
             contentDescription = contentDescription,

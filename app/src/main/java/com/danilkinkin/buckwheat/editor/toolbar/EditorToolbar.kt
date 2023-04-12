@@ -79,7 +79,7 @@ fun EditorToolbar(
         }
         Spacer(modifier = Modifier.width(12.dp))
         BigIconButton(
-            icon = painterResource(R.drawable.ic_settings),
+            icon = painterResource(R.drawable.ic_more_vert),
             contentDescription = null,
             onClick = { appViewModel.openSheet(PathState(SETTINGS_SHEET)) },
         )

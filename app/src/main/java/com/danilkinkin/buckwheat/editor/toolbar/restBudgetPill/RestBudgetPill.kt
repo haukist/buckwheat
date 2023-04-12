@@ -397,7 +397,7 @@ private fun Preview() {
         Row {
             RestBudgetPill()
             BigIconButton(
-                icon = painterResource(R.drawable.ic_settings),
+                icon = painterResource(R.drawable.ic_more_vert),
                 contentDescription = null,
                 onClick = { },
             )
