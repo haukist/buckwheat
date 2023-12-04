@@ -3,7 +3,13 @@ package com.danilkinkin.buckwheat.editor.toolbar
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -19,6 +25,9 @@ import com.danilkinkin.buckwheat.base.BigIconButton
 import com.danilkinkin.buckwheat.data.AppViewModel
 import com.danilkinkin.buckwheat.data.PathState
 import com.danilkinkin.buckwheat.data.SpendsViewModel
+import com.danilkinkin.buckwheat.editor.EditMode
+import com.danilkinkin.buckwheat.editor.EditStage
+import com.danilkinkin.buckwheat.editor.EditorViewModel
 import com.danilkinkin.buckwheat.editor.toolbar.restBudgetPill.RestBudgetPill
 import com.danilkinkin.buckwheat.settings.SETTINGS_SHEET
 import com.danilkinkin.buckwheat.util.observeLiveData
@@ -28,15 +37,16 @@ import kotlinx.coroutines.launch
 fun EditorToolbar(
     spendsViewModel: SpendsViewModel = hiltViewModel(),
     appViewModel: AppViewModel = hiltViewModel(),
+    editorViewModel: EditorViewModel = hiltViewModel(),
 ) {
     val coroutineScope = rememberCoroutineScope()
     val isDebug = appViewModel.isDebug.observeAsState(false)
-    val mode by spendsViewModel.mode.observeAsState(SpendsViewModel.Mode.ADD)
+    val mode by editorViewModel.mode.observeAsState(EditMode.ADD)
 
     val spendsCountScale = remember { Animatable(1f) }
 
-    observeLiveData(spendsViewModel.stage) {
-        if (it === SpendsViewModel.Stage.COMMITTING_SPENT) {
+    observeLiveData(editorViewModel.stage) {
+        if (it === EditStage.COMMITTING_SPENT) {
             coroutineScope.launch {
                 spendsCountScale.animateTo(
                     1.05f,
@@ -61,7 +71,7 @@ fun EditorToolbar(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = if (isDebug.value) 6.dp else 20.dp, end = 6.dp, top = 12.dp)
+            .padding(start = if (isDebug.value) 6.dp else 20.dp, end = 6.dp, top = 6.dp)
             .statusBarsPadding(),
     ) {
         if (isDebug.value) {
@@ -72,7 +82,7 @@ fun EditorToolbar(
             )
         }
         Spacer(modifier = Modifier.width(4.dp))
-        if (mode == SpendsViewModel.Mode.EDIT) {
+        if (mode == EditMode.EDIT) {
             CancelEditSpent()
         } else {
             RestBudgetPill()
@@ -81,7 +91,9 @@ fun EditorToolbar(
         BigIconButton(
             icon = painterResource(R.drawable.ic_more_vert),
             contentDescription = null,
-            onClick = { appViewModel.openSheet(PathState(SETTINGS_SHEET)) },
+            onClick = {
+                appViewModel.openSheet(PathState(SETTINGS_SHEET))
+            },
         )
     }
 }

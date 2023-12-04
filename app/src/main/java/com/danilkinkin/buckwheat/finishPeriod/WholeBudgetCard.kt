@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 import com.danilkinkin.buckwheat.R
+import com.danilkinkin.buckwheat.data.ExtendCurrency
 import com.danilkinkin.buckwheat.ui.BuckwheatTheme
 import com.danilkinkin.buckwheat.util.*
 import java.math.BigDecimal
@@ -40,7 +41,7 @@ fun WholeBudgetCard(
         modifier = modifier.fillMaxWidth(),
         contentPadding = contentPadding,
         label = stringResource(R.string.whole_budget),
-        value = prettyCandyCanes(
+        value = numberFormat(
             budget,
             currency = currency,
         ),
@@ -55,8 +56,8 @@ fun WholeBudgetCard(
                         Text(
                             text = prettyDate(
                                 startDate,
-                                showTime = false,
-                                forceShowDate = true,
+                                pattern = "dd MMM",
+                                simplifyIfToday = false,
                             ),
                             softWrap = false,
                             overflow = TextOverflow.Ellipsis,
@@ -67,7 +68,7 @@ fun WholeBudgetCard(
 
                     Arrow(
                         modifier = Modifier
-                            .padding(horizontal = 16.dp)
+                            .padding(horizontal = if (bigVariant) 16.dp else 8.dp)
                             .fillMaxHeight()
                     )
 
@@ -76,8 +77,8 @@ fun WholeBudgetCard(
                             text = if (finishDate !== null) {
                                 prettyDate(
                                     finishDate,
-                                    showTime = false,
-                                    forceShowDate = true,
+                                    pattern = "dd MMM",
+                                    simplifyIfToday = false,
                                 )
                             } else {
                                 "-"
@@ -175,7 +176,7 @@ fun growByMiddleChildRowMeasurePolicy(localDensity: Density) =
 @Composable
 private fun PreviewChart() {
     BuckwheatTheme {
-        Box() {
+        Box {
             Icon(
                 painter = painterResource(R.drawable.ic_arrow_forward),
                 tint = Color.Green,
@@ -196,7 +197,7 @@ private fun Preview() {
     BuckwheatTheme {
         WholeBudgetCard(
             budget = BigDecimal(60000),
-            currency = ExtendCurrency(type = CurrencyType.NONE),
+            currency = ExtendCurrency.none(),
             startDate = LocalDate.now().minusDays(28).toDate(),
             finishDate = Date(),
         )
@@ -209,7 +210,7 @@ private fun PreviewNightMode() {
     BuckwheatTheme {
         WholeBudgetCard(
             budget = BigDecimal(60000),
-            currency = ExtendCurrency(type = CurrencyType.NONE),
+            currency = ExtendCurrency.none(),
             startDate = LocalDate.now().minusDays(28).toDate(),
             finishDate = Date(),
         )
@@ -222,7 +223,7 @@ private fun PreviewSmallScreen() {
     BuckwheatTheme {
         WholeBudgetCard(
             budget = BigDecimal(60000),
-            currency = ExtendCurrency(type = CurrencyType.NONE),
+            currency = ExtendCurrency.none(),
             startDate = LocalDate.now().minusDays(28).toDate(),
             finishDate = Date(),
         )

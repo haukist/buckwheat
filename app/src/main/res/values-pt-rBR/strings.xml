@@ -8,6 +8,7 @@
     <string name="new_daily_budget">Novo orçamento diário</string>
     <string name="new_daily_budget_description">Hoje você ultrapassou o orçamento diário, não se preocupe, não é assustador. Para os dias seguintes, o orçamento será recalculado tendo em conta o orçamento total restante</string>
     <string name="budget_end">O orçamento acabou</string>
+    <string name="budget_not_set">Sem orçamento definido</string>
     <string name="budget_end_description">Você ultrapassou o orçamento planejado, não se preocupe, não é assustador, os gastos nunca são os mesmos. Comece a gastar mais para entender quanto você vai gastar no final e qual orçamento você precisa</string>
     <string name="new_spent">Novos gastos</string>
     <plurals name="spends_today">
@@ -32,6 +33,8 @@
     <string name="total_per_day">Total de hoje:</string>
 
     <!-- Wallet -->
+    <string name="change_date">Alterar data</string>
+    <string name="change_time">Mudar hora</string>
     <string name="wallet_title">Orçamento</string>
     <string name="wallet_edit_title">Novo orçamento</string>
     <string name="label_budget">Orçamento</string>
@@ -40,9 +43,9 @@
         <item quantity="one">Para %1$s (%2$s dia)</item>
         <item quantity="other">Para %1$s (%2$s dias)</item>
     </plurals>
-    <plurals name="finish_date">
-        <item quantity="one">%1$s (%2$s dia)</item>
-        <item quantity="other">%1$s (%2$s dias)</item>
+    <plurals name="days_count">
+        <item quantity="one">%1$s dia</item>
+        <item quantity="other">%1$s dias</item>
     </plurals>
     <string name="export_to_csv">Exportar para CSV</string>
     <string name="finish_date_not_select">Nenhuma data de término selecionada</string>
@@ -139,6 +142,7 @@
     <string name="export_to_csv_success">Gastos exportados</string>
     <string name="export_to_csv_failed">Falha ao exportar gastos</string>
     <string name="select_currency_description">A moeda não interfere em nada nos cálculos, é apenas uma designação para facilitar o entendimento dos números.</string>
+    <string name="add_spent">Adicionar Resíduos</string>
     <string name="remember_choice_reacalc_budget_description">Mais tarde você pode mudar na sua carteira</string>
     <string name="remember_choice">Lembre-se da sua escolha</string>
     <string name="rest_label">Resto</string>
@@ -153,4 +157,13 @@
     <string name="edit_spent">Gasto editável</string>
     <string name="cancel_editing">Cancelar edição</string>
     <string name="over">sobre</string>
+    <string name="app_widget_extend_name">trigo mourisco estender</string>
+    <string name="app_widget_minimal_name">Trigo mourisco mínimo</string>
+    <string name="add_spent_short">gastos</string>
+    <string name="home_widgets_label">Widgets da tela inicial</string>
+    <string name="try_home_widgets_desc">Agora o trigo sarraceno possui widgets. Experimente e acompanhe o seu orçamento a partir da tela inicial</string>
+    <string name="tutorial_open_wallet">Clique para ver os detalhes do orçamento</string>
+    <string name="tutorial_open_history">Arraste para ver o histórico de gastos</string>
+    <string name="recalc_budget_on_last_day">Hoje é o último dia, não faz sentido distribuir</string>
+    <string name="start_last_day_description">Hoje você pode gastar %1$s</string>
 </resources>

@@ -7,7 +7,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -152,10 +151,8 @@ fun CustomCurrencyEditorContent(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CustomCurrencyEditor(
-    windowSizeClass: WindowWidthSizeClass,
     defaultCurrency: String? = null,
     onChange: (currency: String) -> Unit,
     onClose: () -> Unit,
@@ -165,7 +162,7 @@ fun CustomCurrencyEditor(
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         OverrideLocalize {
-            RenderAdaptivePane(windowSizeClass) {
+            RenderAdaptivePane {
                 CustomCurrencyEditorContent(
                     defaultCurrency = defaultCurrency,
                     onChange = onChange,

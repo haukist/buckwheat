@@ -32,5 +32,4 @@ object AppModule {
     @Singleton
     @Provides
     fun provideStorageDao(db: DatabaseModule) = db.storageDao()
-
 }

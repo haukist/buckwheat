@@ -3,22 +3,23 @@ package com.danilkinkin.buckwheat.wallet
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Surface
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.danilkinkin.buckwheat.R
-import com.danilkinkin.buckwheat.calendar.Calendar
-import com.danilkinkin.buckwheat.calendar.model.CalendarState
-import com.danilkinkin.buckwheat.calendar.model.selectedDatesFormatted
+import com.danilkinkin.buckwheat.base.datePicker.DatePicker
+import com.danilkinkin.buckwheat.base.datePicker.model.CalendarSelectionMode
+import com.danilkinkin.buckwheat.base.datePicker.model.CalendarState
+import com.danilkinkin.buckwheat.base.datePicker.model.selectedDatesFormatted
 import com.danilkinkin.buckwheat.ui.BuckwheatTheme
+import com.danilkinkin.buckwheat.util.countDays
 import com.danilkinkin.buckwheat.util.toDate
 import com.danilkinkin.buckwheat.util.toLocalDate
 import java.time.LocalDate
@@ -33,7 +34,13 @@ fun FinishDateSelector(
     onApply: (finishDate: Date) -> Unit,
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
-        val calendarState = remember { CalendarState(selectDate) }
+        val calendarState = remember {
+            CalendarState(
+                selectionMode = CalendarSelectionMode.RANGE,
+                selectDate = selectDate,
+                disableBeforeDate = Date(),
+            )
+        }
 
         LaunchedEffect(Unit) {
             if (selectDate !== null) calendarState.setSelectedDay(selectDate.toLocalDate())
@@ -57,7 +64,7 @@ private fun FinishDateSelectorContent(
 ) {
     Column {
         FinishDateSelectorTopAppBar(calendarState, onBackPressed, onApply)
-        Calendar(
+        DatePicker(
             calendarState = calendarState,
             onDayClicked = onDayClicked,
         )
@@ -71,13 +78,16 @@ private fun FinishDateSelectorTopAppBar(
     onApply: () -> Unit,
 ) {
     Surface {
-        Column() {
-            Row(Modifier.fillMaxWidth().padding(8.dp)) {
+        Column {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)) {
                 IconButton(
                     onClick = { onBackPressed() }
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.ArrowBack,
+                        painter = painterResource(R.drawable.ic_close),
                         contentDescription = null,
                     )
                 }
@@ -88,7 +98,7 @@ private fun FinishDateSelectorTopAppBar(
                     enabled = calendarState.calendarUiState.value.hasSelectedDates,
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.Check,
+                        painter = painterResource(R.drawable.ic_apply),
                         contentDescription = null,
                         modifier = Modifier.size(ButtonDefaults.IconSize)
 
@@ -107,14 +117,38 @@ private fun FinishDateSelectorTopAppBar(
                         bottom = 24.dp,
                     )
             ) {
-                Text(
-                    text = if (!calendarState.calendarUiState.value.hasSelectedDates) {
-                        stringResource(R.string.select_finish_date_title)
+                Column {
+                    Text(
+                        text = if (!calendarState.calendarUiState.value.hasSelectedDates) {
+                            stringResource(R.string.select_finish_date_title)
+                        } else {
+                            selectedDatesFormatted(calendarState)
+                        },
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                    val days = if (calendarState.calendarUiState.value.hasSelectedDates) {
+                        countDays(
+                            calendarState.calendarUiState.value.selectedEndDate!!.toDate(),
+                            calendarState.calendarUiState.value.selectedStartDate!!.toDate(),
+                        )
                     } else {
-                        selectedDatesFormatted(calendarState)
-                    },
-                    style = MaterialTheme.typography.titleLarge,
-                )
+                        0
+                    }
+
+                    Text(
+                        text = String.format(
+                            pluralStringResource(
+                                id = R.plurals.days_count,
+                                count = days,
+                            ),
+                            days,
+                        ),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                                .copy(alpha = if (calendarState.calendarUiState.value.hasSelectedDates) 0.6f else 0f),
+                        ),
+                    )
+                }
             }
         }
     }

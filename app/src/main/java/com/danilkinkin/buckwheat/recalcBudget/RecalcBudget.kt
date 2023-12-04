@@ -20,13 +20,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.danilkinkin.buckwheat.R
 import com.danilkinkin.buckwheat.base.ButtonRow
-import com.danilkinkin.buckwheat.base.DescriptionButton
 import com.danilkinkin.buckwheat.data.AppViewModel
+import com.danilkinkin.buckwheat.data.RestedBudgetDistributionMethod
 import com.danilkinkin.buckwheat.data.SpendsViewModel
 import com.danilkinkin.buckwheat.ui.BuckwheatTheme
 import com.danilkinkin.buckwheat.util.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 
 const val RECALCULATE_DAILY_BUDGET_SHEET = "recalculateDailyBudget"
 
@@ -34,31 +35,24 @@ const val RECALCULATE_DAILY_BUDGET_SHEET = "recalculateDailyBudget"
 fun RecalcBudget(
     spendsViewModel: SpendsViewModel = hiltViewModel(),
     appViewModel: AppViewModel = hiltViewModel(),
+    recalcBudgetViewModel: RecalcBudgetViewModel = hiltViewModel(),
     onClose: () -> Unit = {},
 ) {
     val haptic = LocalHapticFeedback.current
     val localDensity = LocalDensity.current
-    val isDebug = appViewModel.isDebug.observeAsState(false)
     val coroutineScope = rememberCoroutineScope()
+    val navigationBarHeight = rememberNavigationBarHeight().coerceAtLeast(16.dp)
+
+    val howMuchNotSpent by recalcBudgetViewModel.howMuchNotSpent.observeAsState(BigDecimal.ZERO)
+    val isLastDay by recalcBudgetViewModel.isLastDay.observeAsState(false)
 
     var rememberChoice by remember { mutableStateOf(false) }
-    val restDays = countDays(spendsViewModel.finishDate.value!!)
-
-    val restBudget =
-        (spendsViewModel.budget.value!! - spendsViewModel.spent.value!!) - spendsViewModel.dailyBudget.value!!
-
-    val requireDistributeBudget = spendsViewModel.calcRequireDistributeBudget()
-    val budgetPerDaySplit = spendsViewModel.calcBudgetPerDaySplit()
-    val budgetPerDayAdd = spendsViewModel.calcBudgetPerDay()
-    val budgetPerDayAddDailyBudget = budgetPerDayAdd + requireDistributeBudget
-
-    val navigationBarHeight = WindowInsets.systemBars
-        .asPaddingValues()
-        .calculateBottomPadding()
-        .coerceAtLeast(16.dp)
-
-    var contentHeight by remember { mutableStateOf(0f) }
+    var contentHeight by remember { mutableFloatStateOf(0f) }
     var isSpawned by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        recalcBudgetViewModel.calculate()
+    }
 
     BoxWithConstraints(Modifier.fillMaxWidth()) {
         val rootHeight = constraints.maxHeight.toFloat()
@@ -121,39 +115,49 @@ fun RecalcBudget(
                     )
                     Spacer(Modifier.height(24.dp))
                     Text(
-                        text = prettyCandyCanes(
-                            requireDistributeBudget,
+                        text = numberFormat(
+                            howMuchNotSpent,
                             currency = spendsViewModel.currency.value!!,
                         ),
                         style = MaterialTheme.typography.displayLarge,
                         textAlign = TextAlign.Center,
                     )
                     Spacer(Modifier.height(24.dp))
-                    Text(
-                        text = stringResource(R.string.recalc_budget),
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
-                    )
+                    if (isLastDay) {
+                        Text(
+                            text = stringResource(R.string.recalc_budget_on_last_day),
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(R.string.recalc_budget),
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
                     Spacer(Modifier.height(48.dp))
                 }
-                ButtonRow(
-                    text = stringResource(R.string.remember_choice),
-                    description = stringResource(R.string.remember_choice_reacalc_budget_description),
-                    wrapMainText = true,
-                    iconInset = false,
-                    onClick = {
-                        rememberChoice = !rememberChoice
-                    },
-                    endContent = {
-                        Switch(
-                            checked = rememberChoice,
-                            onCheckedChange = {
-                                rememberChoice = !rememberChoice
-                            },
-                        )
+                if (!isLastDay) {
+                    ButtonRow(
+                        text = stringResource(R.string.remember_choice),
+                        description = stringResource(R.string.remember_choice_reacalc_budget_description),
+                        wrapMainText = true,
+                        iconInset = false,
+                        onClick = {
+                            rememberChoice = !rememberChoice
+                        },
+                        endContent = {
+                            Switch(
+                                checked = rememberChoice,
+                                onCheckedChange = {
+                                    rememberChoice = !rememberChoice
+                                },
+                            )
 
-                    }
-                )
+                        }
+                    )
+                }
                 Spacer(Modifier.height(16.dp))
                 Column(
                     modifier = Modifier
@@ -161,66 +165,28 @@ fun RecalcBudget(
                         .padding(horizontal = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    DescriptionButton(
-                        title = { Text(stringResource(R.string.split_rest_days_title)) },
-                        description = {
-                            Text(
-                                stringResource(
-                                    R.string.split_rest_days_description,
-                                    prettyCandyCanes(
-                                        budgetPerDaySplit,
-                                        currency = spendsViewModel.currency.value!!,
-                                    ),
-                                )
-                            )
-                        },
-                        secondDescription = if (isDebug.value) {
-                            { Text("($restBudget + ${spendsViewModel.dailyBudget.value!!} - ${spendsViewModel.spentFromDailyBudget.value!!}) / $restDays = $budgetPerDaySplit") }
-                        } else null,
-                        onClick = {
-                            spendsViewModel.reCalcDailyBudget(budgetPerDaySplit)
-                            if (rememberChoice) spendsViewModel.changeRecalcRestBudgetMethod(
-                                SpendsViewModel.RecalcRestBudgetMethod.REST
+                    if (isLastDay) {
+                        StartLastDayButton {
+                            onClose()
+                        }
+                        Spacer(Modifier.height(24.dp))
+                    } else {
+                        SplitToRestDaysButton {
+                            if (rememberChoice) spendsViewModel.changeRestedBudgetDistributionMethod(
+                                RestedBudgetDistributionMethod.REST
                             )
 
                             onClose()
-                        },
-                    )
-                    Spacer(Modifier.height(16.dp))
-                    DescriptionButton(
-                        title = { Text(stringResource(R.string.add_current_day_title)) },
-                        description = {
-                            Text(
-                                stringResource(
-                                    R.string.add_current_day_description,
-                                    prettyCandyCanes(
-                                        requireDistributeBudget + budgetPerDayAdd,
-                                        currency = spendsViewModel.currency.value!!,
-                                    ),
-                                    prettyCandyCanes(
-                                        budgetPerDayAdd,
-                                        currency = spendsViewModel.currency.value!!,
-                                    ),
-                                )
-                            )
-                        },
-                        secondDescription = if (isDebug.value) {
-                            {
-                                Text(
-                                    "$restBudget / $restDays = $budgetPerDayAdd " +
-                                            "\n${budgetPerDayAdd} + $requireDistributeBudget = $budgetPerDayAddDailyBudget"
-                                )
-                            }
-                        } else null,
-                        onClick = {
-                            spendsViewModel.reCalcDailyBudget(budgetPerDayAdd + requireDistributeBudget)
-                            if (rememberChoice) spendsViewModel.changeRecalcRestBudgetMethod(
-                                SpendsViewModel.RecalcRestBudgetMethod.ADD_TODAY
+                        }
+                        Spacer(Modifier.height(16.dp))
+                        AddToTodayButton {
+                            if (rememberChoice) spendsViewModel.changeRestedBudgetDistributionMethod(
+                                RestedBudgetDistributionMethod.ADD_TODAY
                             )
 
                             onClose()
-                        },
-                    )
+                        }
+                    }
                 }
             }
         }

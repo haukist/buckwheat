@@ -9,6 +9,7 @@
     <string name="new_daily_budget">Ny daglig budget</string>
     <string name="new_daily_budget_description">Du gick över din dagliga budget idag, oroa dig inte, det är okej. För de följande dagarna kommer budgeten att räknas om med hänsyn till den återstående totala budgeten</string>
     <string name="budget_end">Budgeten avslutad</string>
+    <string name="budget_not_set">Ingen budget satt</string>
     <string name="budget_end_description">Du har slut på budget, oroa dig inte, det är okej, utgifterna är aldrig desamma. Börja spendera ytterligare för att förstå hur mycket du kommer att spendera i slutändan och vilken budget du behöver</string>
     <string name="new_spent">Nya utgifter</string>
     <plurals name="spends_today">
@@ -33,6 +34,8 @@
     <string name="total_per_day">Totalt dagligt:</string>
 
     <!-- Plånbok -->
+    <string name="change_date">Byt datum</string>
+    <string name="change_time">Ändra tid</string>
     <string name="wallet_title">Budget</string>
     <string name="wallet_edit_title">Ny budget</string>
     <string name="label_budget">Budget</string>
@@ -41,9 +44,9 @@
         <item quantity="one">Upp till %1$s (%2$s dagar)</item>
         <item quantity="other">Upp till %1$s (%2$s dagar)</item>
     </plurals>
-    <plurals name="finish_date">
-        <item quantity="one">%1$s (%2$s dag)</item>
-        <item quantity="other">%1$s (%2$s dagar)</item>
+    <plurals name="days_count">
+        <item quantity="one">%1$s dag</item>
+        <item quantity="other">%1$s dagar</item>
     </plurals>
     <string name="export_to_csv">Ladda upp till CSV</string>
     <string name="finish_date_not_select">Inget slutdatum valt</string>
@@ -140,6 +143,7 @@
     <string name="today">Idag</string>
     <string name="export_to_csv_success">Utgifterna exporteras</string>
     <string name="export_to_csv_failed">Det gick inte att exportera utgifter</string>
+    <string name="add_spent">Lägg till avfall</string>
     <string name="remember_choice_reacalc_budget_description">Senare kan du byta plånbok</string>
     <string name="remember_choice">Kom ihåg valet</string>
     <string name="rest_label">Återstod</string>
@@ -154,4 +158,13 @@
     <string name="edit_spent">Redigerbart avfall</string>
     <string name="cancel_editing">Ångra redigering</string>
     <string name="over">över</string>
+    <string name="app_widget_extend_name">Bovete förlänga</string>
+    <string name="app_widget_minimal_name">Bovete minimalt</string>
+    <string name="add_spent_short">Utgifter</string>
+    <string name="home_widgets_label">Startskärmswidgetar</string>
+    <string name="try_home_widgets_desc">Bovetet har nu widgets. Prova det och håll koll på din budget från startskärmen</string>
+    <string name="tutorial_open_wallet">Klicka för att se budgetinformation</string>
+    <string name="tutorial_open_history">Dra för att visa utgiftshistorik</string>
+    <string name="recalc_budget_on_last_day">Idag är sista dagen, det är ingen mening att dela ut</string>
+    <string name="start_last_day_description">Idag kan du spendera %1$s</string>
 </resources>

@@ -45,7 +45,7 @@ fun TextRow(
                 Modifier
                     .fillMaxWidth()
                     .heightIn(24.dp)
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 24.dp)
                     .height(IntrinsicSize.Min),
                 verticalAlignment = Alignment.Top
             ) {
@@ -113,8 +113,8 @@ fun TextRow(
                 Box(
                     Modifier
                         .height(24.dp)
-                        .width(56.dp)
-                        .padding(horizontal = 16.dp),
+                        .width(64.dp)
+                        .padding(start = 24.dp, end = 16.dp),
                     contentAlignment = Alignment.CenterStart
                 ) {
                     Icon(
@@ -132,10 +132,10 @@ fun TextRow(
                 softWrap = true,
                 modifier = Modifier
                     .padding(
-                        start = if (!iconInset && icon === null) 24.dp else (24 + 16 * 2).dp,
+                        start = if (!iconInset && icon === null) 32.dp else (24 + 24 + 16).dp,
                         top = if (denseDescriptionOffset) 0.dp else 8.dp,
                         end = 24.dp,
-                        bottom = 16.dp,
+                        bottom = 24.dp,
                     )
             )
         }
@@ -159,6 +159,18 @@ private fun PreviewWithDescription() {
         TextRow(
             text = "Text row",
             description = "Description of text row",
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewWithDescriptionIconInset() {
+    BuckwheatTheme {
+        TextRow(
+            text = "Text row",
+            description = "Description of text row",
+            iconInset = false,
         )
     }
 }
@@ -222,7 +234,6 @@ private fun PreviewWithIcons() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview()
 @Composable
 private fun PreviewWithIconsWithChip() {
@@ -240,7 +251,6 @@ private fun PreviewWithIconsWithChip() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview()
 @Composable
 private fun PreviewWithIconsWithChipAndEndIcon() {
@@ -259,7 +269,6 @@ private fun PreviewWithIconsWithChipAndEndIcon() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview()
 @Composable
 private fun PreviewWithIconsWithChipWithWrapText() {
@@ -279,7 +288,6 @@ private fun PreviewWithIconsWithChipWithWrapText() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview(name = "With icon, end content, end icon and description")
 @Composable
 private fun PreviewWithIconsWithChipWithDescriptionWithEndContentAndEnIcon() {
@@ -301,7 +309,6 @@ private fun PreviewWithIconsWithChipWithDescriptionWithEndContentAndEnIcon() {
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview(name = "With icon, end content, end icon and description")
 @Composable
 private fun PreviewWithIconsWithChipWithDescriptionWithEndContent() {

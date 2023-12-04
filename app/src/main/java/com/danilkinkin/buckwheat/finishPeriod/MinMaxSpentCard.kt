@@ -1,42 +1,35 @@
 package com.danilkinkin.buckwheat.finishPeriod
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import android.graphics.Point
-import android.util.Log
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme.colors
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.PaintingStyle.Companion.Stroke
-import androidx.compose.ui.graphics.drawscope.Fill
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.danilkinkin.buckwheat.R
+import com.danilkinkin.buckwheat.data.ExtendCurrency
 import com.danilkinkin.buckwheat.data.entities.Spent
-import com.danilkinkin.buckwheat.ui.*
-import com.danilkinkin.buckwheat.util.*
+import com.danilkinkin.buckwheat.ui.BuckwheatTheme
+import com.danilkinkin.buckwheat.ui.colorMax
+import com.danilkinkin.buckwheat.ui.colorMin
+import com.danilkinkin.buckwheat.util.combineColors
+import com.danilkinkin.buckwheat.util.harmonize
+import com.danilkinkin.buckwheat.util.isZero
+import com.danilkinkin.buckwheat.util.numberFormat
+import com.danilkinkin.buckwheat.util.prettyDate
+import com.danilkinkin.buckwheat.util.toDate
+import com.danilkinkin.buckwheat.util.toPalette
 import java.math.BigDecimal
-import java.math.RoundingMode
 import java.time.LocalDate
-import java.util.*
-import kotlin.math.abs
+import java.util.Date
 
 @Composable
 fun MinMaxSpentCard(
@@ -50,9 +43,9 @@ fun MinMaxSpentCard(
 
     val spent = if (isMin) minSpent else maxSpent
 
-    val minValue = minSpent?.value ?: BigDecimal(0)
-    val maxValue = maxSpent?.value ?: BigDecimal(0)
-    val currValue = spent?.value ?: BigDecimal(0)
+    val minValue = minSpent?.value ?: BigDecimal.ZERO
+    val maxValue = maxSpent?.value ?: BigDecimal.ZERO
+    val currValue = spent?.value ?: BigDecimal.ZERO
 
     val harmonizedColor = toPalette(
         harmonize(
@@ -61,7 +54,7 @@ fun MinMaxSpentCard(
                 colorMax,
                 if ((maxValue - minValue).isZero()) {
                     if (isMin) 0f else 1f
-                } else if (maxValue != BigDecimal(0)) {
+                } else if (maxValue != BigDecimal.ZERO) {
                     ((currValue - minValue) / (maxValue - minValue)).toFloat()
                 } else {
                     0f
@@ -73,7 +66,7 @@ fun MinMaxSpentCard(
     StatCard(
         modifier = modifier,
         value = if (spent != null) {
-            prettyCandyCanes(
+            numberFormat(
                 spent.value,
                 currency = currency,
             )
@@ -132,7 +125,7 @@ private fun PreviewMin() {
     BuckwheatTheme {
         MinMaxSpentCard(
             isMin = true,
-            currency = ExtendCurrency(type = CurrencyType.NONE),
+            currency = ExtendCurrency.none(),
             spends = listOf(
                 Spent(value = BigDecimal(52), date = LocalDate.now().minusDays(2).toDate()),
                 Spent(value = BigDecimal(72), date = LocalDate.now().minusDays(2).toDate()),
@@ -154,7 +147,7 @@ private fun PreviewMax() {
     BuckwheatTheme {
         MinMaxSpentCard(
             isMin = false,
-            currency = ExtendCurrency(type = CurrencyType.NONE),
+            currency = ExtendCurrency.none(),
             spends = listOf(
                 Spent(value = BigDecimal(52), date = LocalDate.now().minusDays(2).toDate()),
                 Spent(value = BigDecimal(72), date = LocalDate.now().minusDays(2).toDate()),
@@ -176,7 +169,7 @@ private fun PreviewMinNightMode() {
     BuckwheatTheme {
         MinMaxSpentCard(
             isMin = true,
-            currency = ExtendCurrency(type = CurrencyType.NONE),
+            currency = ExtendCurrency.none(),
             spends = listOf(
                 Spent(value = BigDecimal(52), date = LocalDate.now().minusDays(2).toDate()),
                 Spent(value = BigDecimal(72), date = LocalDate.now().minusDays(2).toDate()),
@@ -198,7 +191,7 @@ private fun PreviewMaxNightMode() {
     BuckwheatTheme {
         MinMaxSpentCard(
             isMin = false,
-            currency = ExtendCurrency(type = CurrencyType.NONE),
+            currency = ExtendCurrency.none(),
             spends = listOf(
                 Spent(value = BigDecimal(52), date = LocalDate.now().minusDays(2).toDate()),
                 Spent(value = BigDecimal(72), date = LocalDate.now().minusDays(2).toDate()),
@@ -220,7 +213,7 @@ private fun PreviewWithSameSpends() {
     BuckwheatTheme {
         MinMaxSpentCard(
             isMin = false,
-            currency = ExtendCurrency(type = CurrencyType.NONE),
+            currency = ExtendCurrency.none(),
             spends = listOf(
                 Spent(value = BigDecimal(42), date = LocalDate.now().minusDays(1).toDate()),
                 Spent(value = BigDecimal(42), date = Date()),
@@ -235,7 +228,7 @@ private fun PreviewWithOneSpent() {
     BuckwheatTheme {
         MinMaxSpentCard(
             isMin = false,
-            currency = ExtendCurrency(type = CurrencyType.NONE),
+            currency = ExtendCurrency.none(),
             spends = listOf(
                 Spent(value = BigDecimal(42), date = Date()),
             ),
@@ -249,7 +242,7 @@ private fun PreviewWithZeroSpends() {
     BuckwheatTheme {
         MinMaxSpentCard(
             isMin = false,
-            currency = ExtendCurrency(type = CurrencyType.NONE),
+            currency = ExtendCurrency.none(),
             spends = listOf(),
         )
     }

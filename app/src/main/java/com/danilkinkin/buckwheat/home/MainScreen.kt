@@ -2,18 +2,48 @@ package com.danilkinkin.buckwheat.home
 
 import android.util.Log
 import androidx.activity.result.ActivityResultRegistryOwner
-import androidx.compose.animation.*
 import androidx.compose.animation.core.EaseInOutQuad
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.rememberSwipeableState
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,29 +52,36 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.danilkinkin.buckwheat.LocalWindowSize
 import com.danilkinkin.buckwheat.R
-import com.danilkinkin.buckwheat.base.*
+import com.danilkinkin.buckwheat.base.SwipeableSnackbarHost
+import com.danilkinkin.buckwheat.base.TopSheetLayout
+import com.danilkinkin.buckwheat.base.TopSheetValue
 import com.danilkinkin.buckwheat.data.AppViewModel
 import com.danilkinkin.buckwheat.data.PathState
 import com.danilkinkin.buckwheat.data.SpendsViewModel
 import com.danilkinkin.buckwheat.data.SystemBarState
 import com.danilkinkin.buckwheat.editor.Editor
 import com.danilkinkin.buckwheat.finishPeriod.FINISH_PERIOD_SHEET
+import com.danilkinkin.buckwheat.history.History
 import com.danilkinkin.buckwheat.keyboard.Keyboard
 import com.danilkinkin.buckwheat.onboarding.ON_BOARDING_SHEET
 import com.danilkinkin.buckwheat.recalcBudget.RECALCULATE_DAILY_BUDGET_SHEET
-import com.danilkinkin.buckwheat.history.History
-import com.danilkinkin.buckwheat.ui.*
+import com.danilkinkin.buckwheat.ui.colorBackground
+import com.danilkinkin.buckwheat.ui.colorEditor
+import com.danilkinkin.buckwheat.ui.colorOnEditor
+import com.danilkinkin.buckwheat.ui.isNightMode
 import com.danilkinkin.buckwheat.util.observeLiveData
 import com.danilkinkin.buckwheat.util.setSystemStyle
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class, FlowPreview::class)
 @Composable
 fun MainScreen(
-    windowSizeClass: WindowWidthSizeClass,
     activityResultRegistryOwner: ActivityResultRegistryOwner?,
     spendsViewModel: SpendsViewModel = viewModel(),
     appViewModel: AppViewModel = viewModel(),
@@ -53,6 +90,7 @@ fun MainScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val localDensity = LocalDensity.current
+    val windowSizeClass = LocalWindowSize.current
 
     val snackBarMessage = stringResource(R.string.remove_spent)
     val snackBarAction = stringResource(R.string.remove_spent_undo)
@@ -96,29 +134,31 @@ fun MainScreen(
         key = isNightModeM.value,
     )
 
-    LaunchedEffect(Unit) {
-        spendsViewModel.lastRemoveSpent.collectLatest {
-            val snackbarResult = appViewModel.snackbarHostState.showSnackbar(
-                message = snackBarMessage,
-                actionLabel = snackBarAction,
-                duration = SnackbarDuration.Long,
-            )
-
+    observeLiveData(spendsViewModel.lastRemovedSpent) {
+        appViewModel.showSnackbar(
+            message = snackBarMessage,
+            actionLabel = snackBarAction,
+            duration = SnackbarDuration.Long,
+        ) { snackbarResult ->
             if (snackbarResult == SnackbarResult.ActionPerformed) {
-                spendsViewModel.undoRemoveSpent(it)
+                spendsViewModel.undoRemoveSpent()
             }
         }
+
+
     }
 
-    observeLiveData(spendsViewModel.requireReCalcBudget) {
+    observeLiveData(spendsViewModel.requireDistributionRestedBudget) {
         if (it) appViewModel.openSheet(PathState(RECALCULATE_DAILY_BUDGET_SHEET))
     }
 
     observeLiveData(spendsViewModel.requireSetBudget) {
-        if (it) appViewModel.openSheet(PathState(ON_BOARDING_SHEET))
+        if (it) {
+            appViewModel.openSheet(PathState(ON_BOARDING_SHEET))
+        }
     }
 
-    observeLiveData(spendsViewModel.finishPeriod) {
+    observeLiveData(spendsViewModel.periodFinished) {
         if (it) appViewModel.openSheet(PathState(FINISH_PERIOD_SHEET))
     }
 
@@ -277,7 +317,7 @@ fun MainScreen(
             }
         }
 
-        BottomSheets(windowSizeClass, activityResultRegistryOwner)
+        BottomSheets(activityResultRegistryOwner)
 
         if (windowSizeClass == WindowWidthSizeClass.Compact) {
             SnackbarHost()
@@ -289,8 +329,6 @@ fun MainScreen(
 fun BoxScope.SnackbarHost(
     appViewModel: AppViewModel = viewModel(),
 ) {
-    val snackbarHostState = remember { appViewModel.snackbarHostState }
-
     Column(
         horizontalAlignment = Alignment.End,
         modifier = Modifier
@@ -298,7 +336,7 @@ fun BoxScope.SnackbarHost(
             .fillMaxWidth()
             .navigationBarsPadding(),
     ) {
-        SwipeableSnackbarHost(hostState = snackbarHostState)
+        SwipeableSnackbarHost(hostState = remember { appViewModel._snackbarHostState })
     }
 }
 

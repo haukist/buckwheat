@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Buckwheat</string>
+    <string name="app_widget_extend_name">Buckwheat extend</string>
+    <string name="app_widget_minimal_name">Buckwheat minimal</string>
 
     <!-- Main -->
     <string name="budget_for_today">Budget for today</string>
@@ -8,6 +10,7 @@
     <string name="new_daily_budget">New daily budget</string>
     <string name="new_daily_budget_description">Today you went beyond the daily budget, do not worry, it\'s not scary. For the following days, the budget will be recalculated taking into account the remaining total budget</string>
     <string name="budget_end">The budget is over</string>
+    <string name="budget_not_set">No budget set</string>
     <string name="budget_end_description">You went beyond the planned budget, do not worry, it\'s not scary, spending is never the same. Start spending further to understand how much you will spend in the end and what budget you need</string>
     <string name="new_spent">New spending</string>
     <plurals name="spends_today">
@@ -30,6 +33,8 @@
     <string name="remove_spent_undo">Undo</string>
     <string name="no_spends">No spending yet</string>
     <string name="total_per_day">Day total:</string>
+    <string name="change_date">Change date</string>
+    <string name="change_time">Change time</string>
 
     <!-- Wallet -->
     <string name="wallet_title">Budget</string>
@@ -40,9 +45,9 @@
         <item quantity="one">To %1$s (%2$s day)</item>
         <item quantity="other">To %1$s (%2$s days)</item>
     </plurals>
-    <plurals name="finish_date">
-        <item quantity="one">%1$s (%2$s day)</item>
-        <item quantity="other">%1$s (%2$s days)</item>
+    <plurals name="days_count">
+        <item quantity="one">%1$s day</item>
+        <item quantity="other">%1$s days</item>
     </plurals>
     <string name="export_to_csv">Export to CSV</string>
     <string name="finish_date_not_select">No finish date selected</string>
@@ -138,6 +143,8 @@
     <string name="today">Today</string>
     <string name="export_to_csv_success">Spending exported</string>
     <string name="export_to_csv_failed">Failed to export expenses</string>
+    <string name="add_spent">Add spent</string>
+    <string name="add_spent_short">Spent</string>
     <string name="select_currency_description">The currency does not affect the calculations in any way, it is just a designation for easier understanding of numbers.</string>
     <string name="remember_choice_reacalc_budget_description">Later you can change in the wallet</string>
     <string name="remember_choice">Remember the choice</string>
@@ -153,4 +160,10 @@
     <string name="edit_spent">Editable spent</string>
     <string name="cancel_editing">Cancel editing</string>
     <string name="over">over</string>
+    <string name="home_widgets_label">Home screen widgets</string>
+    <string name="try_home_widgets_desc">Buckwheat now has widgets. Try it out and keep track of your budget from the home screen</string>
+    <string name="tutorial_open_wallet">Click to view budget details</string>
+    <string name="tutorial_open_history">Drag to view spending history</string>
+    <string name="recalc_budget_on_last_day">Today is the last day, it makes no sense to distribute</string>
+    <string name="start_last_day_description">Today you can spend %1$s</string>
 </resources>

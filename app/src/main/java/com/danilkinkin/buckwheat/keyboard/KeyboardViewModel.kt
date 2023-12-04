@@ -1,8 +1,15 @@
 package com.danilkinkin.buckwheat.keyboard
 
-import androidx.compose.ui.text.input.*
-import androidx.lifecycle.*
-import com.danilkinkin.buckwheat.data.SpendsViewModel
+import androidx.compose.ui.text.input.BackspaceCommand
+import androidx.compose.ui.text.input.CommitTextCommand
+import androidx.compose.ui.text.input.EditCommand
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.ImeOptions
+import androidx.compose.ui.text.input.PlatformTextInputService
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.TextInputService
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -12,7 +19,7 @@ class KeyboardViewModel @Inject constructor(
 ) : ViewModel() {
     var state: TextFieldValue? = null
     var editCommandDispatcher: ((List<EditCommand>) -> Unit)? = null
-    var manualDispatcher: ((action: SpendsViewModel.Action, value: Int?) -> Unit)? = { _, _ -> }
+    var manualDispatcher: ((action: KeyboardAction, value: Int?) -> Unit)? = { _, _ -> }
     var textFiledIsFocus: Boolean = false
 
     private val platformTextInputService = object : PlatformTextInputService {
@@ -41,22 +48,22 @@ class KeyboardViewModel @Inject constructor(
         }
     }
 
-    fun executeAction(action: SpendsViewModel.Action, value: Int? = null) {
+    fun executeAction(action: KeyboardAction, value: Int? = null) {
         if (manualDispatcher !== null) {
             manualDispatcher!!(action, value)
         }
 
         if (editCommandDispatcher === null) return
 
-        if (action === SpendsViewModel.Action.PUT_NUMBER) {
+        if (action === KeyboardAction.PUT_NUMBER) {
             editCommandDispatcher!!(listOf(
                 CommitTextCommand(value.toString(), value.toString().length)
             ))
-        } else if (action === SpendsViewModel.Action.REMOVE_LAST) {
+        } else if (action === KeyboardAction.REMOVE_LAST) {
             editCommandDispatcher!!(listOf(
                 BackspaceCommand()
             ))
-        } else if (action === SpendsViewModel.Action.SET_DOT) {
+        } else if (action === KeyboardAction.SET_DOT) {
             editCommandDispatcher!!(listOf(
                 CommitTextCommand(".", 1)
             ))

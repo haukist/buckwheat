@@ -23,11 +23,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.danilkinkin.buckwheat.R
+import com.danilkinkin.buckwheat.budgetDataStore
 import com.danilkinkin.buckwheat.data.AppViewModel
 import com.danilkinkin.buckwheat.data.SpendsViewModel
+import com.danilkinkin.buckwheat.di.TUTORIAL_STAGE
+import com.danilkinkin.buckwheat.di.TUTORS
+import com.danilkinkin.buckwheat.editor.EditorViewModel
 import com.danilkinkin.buckwheat.finishPeriod.WholeBudgetCard
 import com.danilkinkin.buckwheat.ui.BuckwheatTheme
 import com.danilkinkin.buckwheat.ui.colorEditor
+import com.danilkinkin.buckwheat.data.ExtendCurrency
 import com.danilkinkin.buckwheat.util.isSameDay
 import com.danilkinkin.buckwheat.util.toDate
 import com.danilkinkin.buckwheat.util.toLocalDate
@@ -44,19 +49,20 @@ fun History(
     modifier: Modifier = Modifier,
     spendsViewModel: SpendsViewModel = viewModel(),
     appViewModel: AppViewModel = viewModel(),
+    editorViewModel: EditorViewModel = viewModel(),
     onClose: () -> Unit = {}
 ) {
     val scrollState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
-    val spends by spendsViewModel.getSpends().observeAsState(initial = null)
-    val budget = spendsViewModel.budget.observeAsState(initial = BigDecimal(0))
-    val startDate = spendsViewModel.startDate.observeAsState(initial = Date())
-    val finishDate = spendsViewModel.finishDate.observeAsState(initial = Date())
+    val spends by spendsViewModel.spends.observeAsState(initial = null)
+    val budget = spendsViewModel.budget.observeAsState(initial = BigDecimal.ZERO)
+    val currency = spendsViewModel.currency.observeAsState(initial = ExtendCurrency.none())
+    val startPeriodDate = spendsViewModel.startPeriodDate.observeAsState(initial = Date())
+    val finishPeriodDate = spendsViewModel.finishPeriodDate.observeAsState(initial = Date())
     val scrollToBottom = remember { mutableStateOf(true) }
-    val showSwipeTutorial = remember {
-        appViewModel.getBooleanValue("tutorialSwipe", true)
-    }
+    val tutorial by appViewModel.getTutorialStage(TUTORS.SWIPE_EDIT_SPENT).observeAsState(TUTORIAL_STAGE.NONE)
+    var isUserTrySwipe by remember { mutableStateOf(false) }
 
     DisposableEffect(Unit) {
         appViewModel.lockSwipeable.value = false
@@ -65,8 +71,8 @@ fun History(
         onDispose {
             appViewModel.lockSwipeable.value = false
 
-            if (spends !== null && spends!!.isNotEmpty()) {
-                appViewModel.setBooleanValue("tutorialSwipe", false)
+            if (spends !== null && spends!!.isNotEmpty() && isUserTrySwipe) {
+                appViewModel.passTutorial(TUTORS.SWIPE_EDIT_SPENT)
             }
         }
     }
@@ -182,7 +188,7 @@ fun History(
                         RowEntityType.DayDivider -> HistoryDateDivider(row.day)
                         RowEntityType.DayTotal -> TotalPerDay(
                             spentPerDay = row.dayTotal!!,
-                            currency = spendsViewModel.currency.value!!,
+                            currency = currency.value,
                         )
                         RowEntityType.Spent -> SwipeActions(
                             startActionsConfig = SwipeActionsConfig(
@@ -191,9 +197,9 @@ fun History(
                                 backgroundActive = MaterialTheme.colorScheme.tertiary,
                                 iconTint = MaterialTheme.colorScheme.onTertiary,
                                 icon = painterResource(R.drawable.ic_edit),
-                                stayDismissed = true,
+                                stayDismissed = false,
                                 onDismiss = {
-                                    spendsViewModel.editSpent(row.spent!!)
+                                    editorViewModel.startEditingSpent(row.spent!!)
                                     onClose()
                                 }
                             ),
@@ -208,7 +214,8 @@ fun History(
                                     spendsViewModel.removeSpent(row.spent!!)
                                 }
                             ),
-                            showTutorial = index == animatedList.value.size - 2 && showSwipeTutorial
+                            onTried = { isUserTrySwipe = true },
+                            showTutorial = index == 2 && tutorial === TUTORIAL_STAGE.READY_TO_SHOW,
                         ) { state ->
                             val size = with(LocalDensity.current) {
                                 java.lang.Float.max(
@@ -266,7 +273,7 @@ fun History(
                                 ) {
                                     SpentItem(
                                         spent = row.spent!!,
-                                        currency = spendsViewModel.currency.value!!
+                                        currency = currency.value
                                     )
                                 }
                             }
@@ -278,9 +285,9 @@ fun History(
                     WholeBudgetCard(
                         modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
                         budget = budget.value,
-                        currency = spendsViewModel.currency.value!!,
-                        startDate = startDate.value,
-                        finishDate = finishDate.value,
+                        currency = currency.value,
+                        startDate = startPeriodDate.value,
+                        finishDate = finishPeriodDate.value,
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                             contentColor = MaterialTheme.colorScheme.onTertiaryContainer,

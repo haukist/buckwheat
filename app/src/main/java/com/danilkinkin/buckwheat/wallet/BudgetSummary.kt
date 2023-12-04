@@ -9,7 +9,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.danilkinkin.buckwheat.data.SpendsViewModel
 import com.danilkinkin.buckwheat.finishPeriod.RestAndSpentBudgetCard
 import com.danilkinkin.buckwheat.finishPeriod.WholeBudgetCard
-import com.danilkinkin.buckwheat.util.ExtendCurrency
+import com.danilkinkin.buckwheat.data.ExtendCurrency
 
 @Composable
 fun BudgetSummary(
@@ -35,13 +35,13 @@ fun BudgetSummary(
                 modifier = Modifier.weight(1f),
                 bigVariant = false,
                 budget = wholeBudget,
-                currency = currency!!,
-                startDate = spendsViewModel.startDate.value!!,
-                finishDate = spendsViewModel.finishDate.value!!,
+                currency = currency,
+                startDate = spendsViewModel.startPeriodDate.value!!,
+                finishDate = spendsViewModel.finishPeriodDate.value!!,
             )
             DaysLeftCard(
-                startDate = spendsViewModel.startDate.value!!,
-                finishDate = spendsViewModel.finishDate.value!!,
+                startDate = spendsViewModel.startPeriodDate.value!!,
+                finishDate = spendsViewModel.finishPeriodDate.value!!,
             )
         }
         EditButton(onClick = { onEdit() })

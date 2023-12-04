@@ -37,9 +37,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import com.danilkinkin.buckwheat.editor.calcAdaptiveFont
 import com.danilkinkin.buckwheat.ui.colorOnEditor
-import com.danilkinkin.buckwheat.util.ExtendCurrency
-import com.danilkinkin.buckwheat.util.prettyCandyCanes
+import com.danilkinkin.buckwheat.data.ExtendCurrency
+import com.danilkinkin.buckwheat.util.numberFormat
 import kotlinx.coroutines.CoroutineStart
+import java.math.BigDecimal
 import kotlin.math.ceil
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -80,8 +81,8 @@ fun TextFieldWithPaddings(
         with(localDensity) { contentPadding.calculateEndPadding(layoutDirection).toPx().toInt() }
 
     val currSymbol = currency?.let { currency ->
-        prettyCandyCanes(
-            0.toBigDecimal(),
+        numberFormat(
+            BigDecimal.ZERO,
             currency,
             maximumFractionDigits = 0,
             minimumFractionDigits = 0,
@@ -259,6 +260,12 @@ fun TextFieldWithPaddings(
                     }
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+            )
+        }
+
+        LaunchedEffect(key1 = Unit) {
+            textFieldValueState = textFieldValueState.copy(
+                selection = TextRange(textFieldValueState.text.length)
             )
         }
 

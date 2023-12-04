@@ -11,7 +11,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.danilkinkin.buckwheat.appTheme
-import com.danilkinkin.buckwheat.dataStore
+import com.danilkinkin.buckwheat.settingsDataStore
 import com.danilkinkin.buckwheat.ui.harmonize.palettes.CorePalette
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -19,7 +19,7 @@ import kotlinx.coroutines.runBlocking
 
 enum class ThemeMode { LIGHT, NIGHT, SYSTEM }
 
-private fun darkColorScheme(): ColorScheme {
+fun darkColorScheme(): ColorScheme {
     val palette = CorePalette.contentOf(colorSeed.toArgb())
     
     return darkColorScheme(
@@ -55,7 +55,7 @@ private fun darkColorScheme(): ColorScheme {
     )
 }
 
-private fun lightColorScheme(): ColorScheme {
+fun lightColorScheme(): ColorScheme {
     val palette = CorePalette.contentOf(colorSeed.toArgb())
 
     return lightColorScheme(
@@ -124,7 +124,7 @@ fun BuckwheatTheme(
 }
 
 suspend fun switchTheme(context: Context, mode: ThemeMode) {
-    context.dataStore.edit {
+    context.settingsDataStore.edit {
         it[stringPreferencesKey("theme")] = mode.toString()
     }
 
@@ -132,7 +132,7 @@ suspend fun switchTheme(context: Context, mode: ThemeMode) {
 }
 
 fun syncTheme(context: Context) {
-    val currentValue = runBlocking { context.dataStore.data.first() }
+    val currentValue = runBlocking { context.settingsDataStore.data.first() }
 
     val mode = ThemeMode.valueOf(
         currentValue[stringPreferencesKey("theme")] ?: ThemeMode.SYSTEM.toString()

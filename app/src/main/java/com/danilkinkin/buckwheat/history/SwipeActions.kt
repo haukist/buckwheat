@@ -62,13 +62,13 @@ val DefaultSwipeActionsConfig = SwipeActionsConfig(
 @OptIn(
     ExperimentalMaterialApi::class,
     ExperimentalComposeUiApi::class,
-    ExperimentalAnimationApi::class,
 )
 @Composable
 fun SwipeActions(
     modifier: Modifier = Modifier,
     startActionsConfig: SwipeActionsConfig = DefaultSwipeActionsConfig,
     endActionsConfig: SwipeActionsConfig = DefaultSwipeActionsConfig,
+    onTried: () -> Unit = {},
     showTutorial: Boolean = false,
     content: @Composable (DismissState) -> Unit,
 ) = BoxWithConstraints(modifier) {
@@ -81,6 +81,7 @@ fun SwipeActions(
 
     val state = rememberDismissState(
         confirmStateChange = {
+            onTried()
             if (willDismissDirection == DismissDirection.StartToEnd
                 && it == DismissValue.DismissedToEnd
             ) {
@@ -174,7 +175,7 @@ fun SwipeActions(
                     fadeIn(
                         tween(0),
                         initialAlpha = if (targetState.second) 1f else 0f,
-                    ) with fadeOut(
+                    ) togetherWith fadeOut(
                         tween(0),
                         targetAlpha = if (targetState.second) .7f else 0f,
                     )

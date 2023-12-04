@@ -13,28 +13,28 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.danilkinkin.buckwheat.R
 import com.danilkinkin.buckwheat.data.SpendsViewModel
+import com.danilkinkin.buckwheat.editor.EditorViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RowScope.CancelEditSpent(
-    spendsViewModel: SpendsViewModel = hiltViewModel()
+    spendsViewModel: SpendsViewModel = hiltViewModel(),
+    editorViewModel: EditorViewModel = hiltViewModel(),
 ) {
     Card(
         modifier = Modifier
             .weight(1F)
-            .padding(0.dp, 6.dp)
-            .height(44.dp),
+            .padding(0.dp, 5.dp)
+            .height(46.dp),
         shape = CircleShape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         ),
         onClick = {
-            spendsViewModel.resetSpent()
+            editorViewModel.resetEditingSpent()
         }
     ) {
-        val textColor = LocalContentColor.current
-
         Row(
             modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically,
@@ -49,7 +49,6 @@ fun RowScope.CancelEditSpent(
             Text(
                 text = stringResource(R.string.cancel_editing),
                 style = MaterialTheme.typography.labelLarge,
-                color = textColor.copy(alpha = 0.6f),
                 overflow = TextOverflow.Ellipsis,
                 softWrap = false,
             )

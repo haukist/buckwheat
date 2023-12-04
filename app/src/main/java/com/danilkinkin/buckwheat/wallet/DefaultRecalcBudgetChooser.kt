@@ -1,14 +1,20 @@
 package com.danilkinkin.buckwheat.wallet
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,18 +25,18 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.danilkinkin.buckwheat.R
 import com.danilkinkin.buckwheat.base.CheckedRow
 import com.danilkinkin.buckwheat.data.AppViewModel
+import com.danilkinkin.buckwheat.data.RestedBudgetDistributionMethod
 import com.danilkinkin.buckwheat.data.SpendsViewModel
 
 const val DEFAULT_RECALC_BUDGET_CHOOSER = "defaultRecalcBudgetChooser"
 
 @Composable
 fun DefaultRecalcBudgetChooser(
-    windowSizeClass: WindowWidthSizeClass,
     appViewModel: AppViewModel = hiltViewModel(),
     spendsViewModel: SpendsViewModel = hiltViewModel(),
     onClose: () -> Unit = {},
 ) {
-    val recalcRestBudgetMethod by spendsViewModel.recalcRestBudgetMethod.observeAsState()
+    val restedBudgetDistributionMethod by spendsViewModel.restedBudgetDistributionMethod.observeAsState()
 
     val navigationBarHeight = WindowInsets.systemBars
         .asPaddingValues()
@@ -68,26 +74,26 @@ fun DefaultRecalcBudgetChooser(
                         )
                 )
                 CheckedRow(
-                    checked = recalcRestBudgetMethod === SpendsViewModel.RecalcRestBudgetMethod.ASK,
+                    checked = restedBudgetDistributionMethod === RestedBudgetDistributionMethod.ASK,
                     onValueChange = {
-                        spendsViewModel.changeRecalcRestBudgetMethod(SpendsViewModel.RecalcRestBudgetMethod.ASK)
+                        spendsViewModel.changeRestedBudgetDistributionMethod(RestedBudgetDistributionMethod.ASK)
                         onClose()
                     },
                     text = stringResource(R.string.always_ask),
                 )
                 CheckedRow(
-                    checked = recalcRestBudgetMethod === SpendsViewModel.RecalcRestBudgetMethod.REST,
+                    checked = restedBudgetDistributionMethod === RestedBudgetDistributionMethod.REST,
                     onValueChange = {
-                        spendsViewModel.changeRecalcRestBudgetMethod(SpendsViewModel.RecalcRestBudgetMethod.REST)
+                        spendsViewModel.changeRestedBudgetDistributionMethod(RestedBudgetDistributionMethod.REST)
                         onClose()
                     },
                     text = stringResource(R.string.method_split_to_rest_days_title),
                     description = stringResource(R.string.method_split_to_rest_days_description),
                 )
                 CheckedRow(
-                    checked = recalcRestBudgetMethod === SpendsViewModel.RecalcRestBudgetMethod.ADD_TODAY,
+                    checked = restedBudgetDistributionMethod === RestedBudgetDistributionMethod.ADD_TODAY,
                     onValueChange = {
-                        spendsViewModel.changeRecalcRestBudgetMethod(SpendsViewModel.RecalcRestBudgetMethod.ADD_TODAY)
+                        spendsViewModel.changeRestedBudgetDistributionMethod(RestedBudgetDistributionMethod.ADD_TODAY)
                         onClose()
                     },
                     text = stringResource(R.string.method_add_to_current_day_title),

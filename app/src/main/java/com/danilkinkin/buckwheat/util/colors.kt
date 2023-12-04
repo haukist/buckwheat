@@ -6,7 +6,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.danilkinkin.buckwheat.ui.harmonize.blend.Blend
 import com.danilkinkin.buckwheat.ui.harmonize.palettes.CorePalette
-import com.danilkinkin.buckwheat.ui.harmonize.palettes.TonalPalette
 import com.danilkinkin.buckwheat.ui.isNightMode
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -55,7 +54,7 @@ data class HarmonizedColorPalette(
     val onSurfaceVariant: Color,
 )
 
-private fun lightFromCorePalette(color: Color): HarmonizedColorPalette {
+fun lightFromCorePalette(color: Color): HarmonizedColorPalette {
     val contentOfPalette = CorePalette.contentOf(color.toArgb())
     val ofPalette = CorePalette.of(color.toArgb())
 

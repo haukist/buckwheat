@@ -25,8 +25,11 @@ import com.danilkinkin.buckwheat.R
 import com.danilkinkin.buckwheat.base.ButtonRow
 import com.danilkinkin.buckwheat.base.Divider
 import com.danilkinkin.buckwheat.data.AppViewModel
+import com.danilkinkin.buckwheat.data.ExtendCurrency
 import com.danilkinkin.buckwheat.data.PathState
+import com.danilkinkin.buckwheat.data.RestedBudgetDistributionMethod
 import com.danilkinkin.buckwheat.data.SpendsViewModel
+import com.danilkinkin.buckwheat.di.TUTORS
 import com.danilkinkin.buckwheat.ui.BuckwheatTheme
 import com.danilkinkin.buckwheat.util.*
 import java.math.BigDecimal
@@ -35,11 +38,9 @@ import java.util.*
 
 const val WALLET_SHEET = "wallet"
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun Wallet(
     forceChange: Boolean = false,
-    windowSizeClass: WindowWidthSizeClass,
     activityResultRegistryOwner: ActivityResultRegistryOwner? = null,
     appViewModel: AppViewModel = hiltViewModel(),
     spendsViewModel: SpendsViewModel = hiltViewModel(),
@@ -47,13 +48,19 @@ fun Wallet(
 ) {
     val haptic = LocalHapticFeedback.current
 
-    var budget by remember { mutableStateOf(spendsViewModel.budget.value!!) }
-    val dateToValue = remember { mutableStateOf(spendsViewModel.finishDate.value) }
+    var budgetCache by remember { mutableStateOf(spendsViewModel.budget.value!!) }
+    val budget by spendsViewModel.budget.observeAsState(BigDecimal.ZERO)
+    val spent by spendsViewModel.spent.observeAsState(BigDecimal.ZERO)
+    val spentFromDailyBudget by spendsViewModel.spentFromDailyBudget.observeAsState(BigDecimal.ZERO)
+    val startPeriodDate by spendsViewModel.startPeriodDate.observeAsState(Date())
+    val finishPeriodDate by spendsViewModel.finishPeriodDate.observeAsState(Date())
+    val dateToValue = remember { mutableStateOf(spendsViewModel.finishPeriodDate.value) }
     val currency by spendsViewModel.currency.observeAsState()
-    val spends by spendsViewModel.getSpends().observeAsState()
-    val recalcRestBudgetMethod by spendsViewModel.recalcRestBudgetMethod.observeAsState()
+    val spends by spendsViewModel.spends.observeAsState()
+    val restedBudgetDistributionMethod by spendsViewModel.restedBudgetDistributionMethod.observeAsState()
+
     val restBudget =
-        (spendsViewModel.budget.value!! - spendsViewModel.spent.value!! - spendsViewModel.spentFromDailyBudget.value!!)
+        (budgetCache - spent - spentFromDailyBudget)
 
     val openConfirmChangeBudgetDialog = remember { mutableStateOf(false) }
 
@@ -65,15 +72,15 @@ fun Wallet(
         .coerceAtLeast(16.dp)
 
     val isChange = (
-            budget != spendsViewModel.budget.value
-                    || dateToValue.value != spendsViewModel.finishDate.value
+            budgetCache != budget
+                    || dateToValue.value != finishPeriodDate
             )
 
-    var isEdit by remember(spendsViewModel.startDate, spendsViewModel.finishDate, forceChange) {
+    var isEdit by remember(startPeriodDate, finishPeriodDate, forceChange) {
         mutableStateOf(
-            (spendsViewModel.finishDate.value !== null && isSameDay(
-                spendsViewModel.startDate.value!!.time,
-                spendsViewModel.finishDate.value!!.time
+            (finishPeriodDate !== null && isSameDay(
+                startPeriodDate.time,
+                finishPeriodDate!!.time
             ))
                     || forceChange
         )
@@ -84,7 +91,7 @@ fun Wallet(
     Surface {
         Column {
             val days = if (dateToValue.value !== null) {
-                countDays(dateToValue.value!!)
+                countDaysToToday(dateToValue.value!!)
             } else {
                 0
             }
@@ -142,25 +149,25 @@ fun Wallet(
                     targetState = isEdit,
                     transitionSpec = {
                         if (targetState && !initialState) {
-                            slideInHorizontally(
+                            (slideInHorizontally(
                                 tween(durationMillis = 150)
                             ) { offset } + fadeIn(
                                 tween(durationMillis = 150)
-                            ) with slideOutHorizontally(
+                            )).togetherWith(slideOutHorizontally(
                                 tween(durationMillis = 150)
                             ) { -offset } + fadeOut(
                                 tween(durationMillis = 150)
-                            )
+                            ))
                         } else {
-                            slideInHorizontally(
+                            (slideInHorizontally(
                                 tween(durationMillis = 150)
                             ) { -offset } + fadeIn(
                                 tween(durationMillis = 150)
-                            ) with slideOutHorizontally(
+                            )).togetherWith(slideOutHorizontally(
                                 tween(durationMillis = 150)
                             ) { offset } + fadeOut(
                                 tween(durationMillis = 150)
-                            )
+                            ))
                         }.using(
                             SizeTransform(
                                 clip = true,
@@ -173,7 +180,7 @@ fun Wallet(
                         BudgetConstructor(
                             forceChange = forceChange,
                             onChange = { newBudget, finishDate ->
-                                budget = newBudget
+                                budgetCache = newBudget
                                 dateToValue.value = finishDate
                             }
                         )
@@ -192,14 +199,14 @@ fun Wallet(
                     onClick = {
                         appViewModel.openSheet(PathState(DEFAULT_RECALC_BUDGET_CHOOSER))
                     },
-                    endCaption = when (recalcRestBudgetMethod) {
-                        SpendsViewModel.RecalcRestBudgetMethod.ASK, null -> stringResource(
+                    endCaption = when (restedBudgetDistributionMethod) {
+                        RestedBudgetDistributionMethod.ASK, null -> stringResource(
                             R.string.always_ask
                         )
-                        SpendsViewModel.RecalcRestBudgetMethod.REST -> stringResource(
+                        RestedBudgetDistributionMethod.REST -> stringResource(
                             R.string.method_split_to_rest_days_title
                         )
-                        SpendsViewModel.RecalcRestBudgetMethod.ADD_TODAY -> stringResource(
+                        RestedBudgetDistributionMethod.ADD_TODAY -> stringResource(
                             R.string.method_add_to_current_day_title
                         )
                     },
@@ -211,7 +218,7 @@ fun Wallet(
                         appViewModel.openSheet(PathState(CURRENCY_EDITOR))
                     },
                     endCaption = when (currency?.type) {
-                        CurrencyType.FROM_LIST -> "${
+                        ExtendCurrency.Type.FROM_LIST -> "${
                             Currency.getInstance(
                                 currency!!.value
                             ).displayName.titleCase()
@@ -220,7 +227,7 @@ fun Wallet(
                                 currency!!.value
                             ).symbol
                         })"
-                        CurrencyType.CUSTOM -> currency!!.value!!
+                        ExtendCurrency.Type.CUSTOM -> currency!!.value!!
                         else -> ""
                     },
                 )
@@ -268,22 +275,21 @@ fun Wallet(
                 ) {
                     Column {
                         Divider()
-                        Spacer(Modifier.height(24.dp))
                         Total(
-                            budget = budget,
+                            budget = budgetCache,
                             restBudget = restBudget,
                             days = days,
                             currency = currency!!,
                         )
-                        Spacer(Modifier.height(24.dp))
                         Button(
                             onClick = {
                                 if (spends!!.isNotEmpty() && !forceChange) {
                                     openConfirmChangeBudgetDialog.value = true
                                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 } else {
-                                    spendsViewModel.changeCurrency(currency!!)
-                                    spendsViewModel.changeBudget(budget, dateToValue.value!!)
+                                    spendsViewModel.changeDisplayCurrency(currency!!)
+                                    spendsViewModel.changeBudget(budgetCache, dateToValue.value!!)
+                                    appViewModel.activateTutorial(TUTORS.OPEN_WALLET)
 
                                     onClose()
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -291,8 +297,9 @@ fun Wallet(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .heightIn(60.dp)
                                 .padding(horizontal = 16.dp),
-                            enabled = dateToValue.value !== null && countDays(dateToValue.value!!) > 0 && budget > BigDecimal(
+                            enabled = dateToValue.value !== null && countDaysToToday(dateToValue.value!!) > 0 && budgetCache > BigDecimal(
                                 0
                             )
                         ) {
@@ -302,6 +309,12 @@ fun Wallet(
                                 } else {
                                     stringResource(R.string.apply)
                                 },
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Icon(
+                                painter = painterResource(R.drawable.ic_arrow_forward),
+                                contentDescription = null,
                             )
                         }
                     }
@@ -312,10 +325,9 @@ fun Wallet(
 
     if (openConfirmChangeBudgetDialog.value) {
         ConfirmChangeBudgetDialog(
-            windowSizeClass = windowSizeClass,
             onConfirm = {
-                spendsViewModel.changeCurrency(currency!!)
-                spendsViewModel.changeBudget(budget, dateToValue.value!!)
+                spendsViewModel.changeDisplayCurrency(currency!!)
+                spendsViewModel.changeBudget(budgetCache, dateToValue.value!!)
 
                 onClose()
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -329,6 +341,6 @@ fun Wallet(
 @Composable
 fun PreviewWallet() {
     BuckwheatTheme {
-        Wallet(windowSizeClass = WindowWidthSizeClass.Compact)
+        Wallet()
     }
 }

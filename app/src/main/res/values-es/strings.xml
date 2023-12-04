@@ -8,6 +8,7 @@
     <string name="new_daily_budget">Nuevo presupuesto diario</string>
     <string name="new_daily_budget_description">Hoy has sobrepasado el presupuesto, pero no te preocupes. El presupuesto de los próximos días se recalculará de acuerdo al dinero que quede.</string>
     <string name="budget_end">Se ha acabado el presupuesto</string>
+    <string name="budget_not_set">Sin presupuesto establecido</string>
     <string name="budget_end_description">Has sobrepasado el presupuesto, pero no te preocupes, las necesidades de gasto no siempre son las mismas. Sigue gastando para entender cuánto gastarás a final de mes y cuánto debes presupuestar.</string>
     <string name="new_spent">Nuevo gasto</string>
     <plurals name="spends_today">
@@ -32,6 +33,8 @@
     <string name="total_per_day">Total del día:</string>
 
     <!-- Wallet -->
+    <string name="change_date">Cambiar fecha</string>
+    <string name="change_time">Cambio de hora</string>
     <string name="wallet_title">Presupuesto</string>
     <string name="wallet_edit_title">Nuevo presupuesto</string>
     <string name="label_budget">Presupuesto</string>
@@ -40,9 +43,9 @@
         <item quantity="one">Hasta el %1$s (%2$s día)</item>
         <item quantity="other">Hasta el %1$s (%2$s días)</item>
     </plurals>
-    <plurals name="finish_date">
-        <item quantity="one">%1$s (%2$s día)</item>
-        <item quantity="other">%1$s (%2$s días)</item>
+    <plurals name="days_count">
+        <item quantity="one">%1$s día</item>
+        <item quantity="other">%1$s días</item>
     </plurals>
     <string name="export_to_csv">Exportar en CSV</string>
     <string name="finish_date_not_select">Sin fecha final definida</string>
@@ -117,7 +120,7 @@
     <string name="overspending_after_not_go_out_budget">Más sobre el presupuesto que no cumpliste</string>
     <string name="overspending_after_few_times_out_budget">Después, quedaron %1$s de los %2$s sobre el presupuesto</string>
     <string name="overspending_after_many_times_out_budget">Tras quedar %1$s de los %2$s, te ajustaste al presupuesto</string>
-    <string name="overspending_after_all_times_out_budget">Después de sobrarte %1$s, no sobrepasaste el presupuesto</string>
+    <string name="overspending_after_all_times_out_budget">Después de excederte %1$s, no sobrepasaste el presupuesto</string>
 
     <!-- Onboarding -->
     <string name="hello">¡Hola!</string>
@@ -132,13 +135,14 @@
 
     <!-- Common -->
     <string name="copy_in_clipboard">Copiado al portapapeles</string>
-    <string name="not_found_email_clients">No se ha encontrado ningún cliente email</string>
+    <string name="not_found_email_clients">No se ha encontrado ningún cliente de email</string>
     <string name="cancel">Cancelar</string>
     <string name="accept">Aceptar</string>
     <string name="today">Hoy</string>
-    <string name="export_to_csv_success">Gastos exportados</string>
-    <string name="export_to_csv_failed">Fallo al exportar los gastos</string>
+    <string name="export_to_csv_success">Gastos exportados en CSV</string>
+    <string name="export_to_csv_failed">Fallo al exportar los gastos en CSV</string>
     <string name="select_currency_description">La divisa no afecta a los cálculos en absoluto, solo ayuda a entender mejor los números.</string>
+    <string name="add_spent">Añadir gastado</string>
     <string name="remember_choice_reacalc_budget_description">Podrás cambiarlo más tarde en la cartera</string>
     <string name="remember_choice">Recordar mi elección</string>
     <string name="rest_label">Sobra</string>
@@ -152,5 +156,14 @@
     <string name="spent_budget">Gastado</string>
     <string name="edit_spent">Gasto editable</string>
     <string name="cancel_editing">Cancelar edición</string>
-    <string name="over">más del</string>
+    <string name="over">Por encima de</string>
+    <string name="app_widget_extend_name">Widget ancho</string>
+    <string name="app_widget_minimal_name">Widget mínimo</string>
+    <string name="add_spent_short">Gasto</string>
+    <string name="home_widgets_label">Widgets de pantalla de inicio</string>
+    <string name="try_home_widgets_desc">El trigo sarraceno ahora tiene widgets. Pruébalo y lleva un seguimiento de tu presupuesto desde la pantalla de inicio</string>
+    <string name="tutorial_open_wallet">Haga clic para ver los detalles del presupuesto</string>
+    <string name="tutorial_open_history">Arrastra para ver el historial de gastos</string>
+    <string name="recalc_budget_on_last_day">Hoy es el último día, no tiene sentido distribuir.</string>
+    <string name="start_last_day_description">Hoy puedes gastar %1$s</string>
 </resources>

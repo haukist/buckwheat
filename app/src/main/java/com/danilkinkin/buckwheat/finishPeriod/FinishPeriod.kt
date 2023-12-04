@@ -36,7 +36,7 @@ fun FinishPeriod(
     onCreateNewPeriod: () -> Unit = {},
     onClose: () -> Unit = {},
 ) {
-    val spends by spendsViewModel.getSpends().observeAsState(initial = emptyList())
+    val spends by spendsViewModel.spends.observeAsState(emptyList())
     val wholeBudget = spendsViewModel.budget.value!!
     val scrollState = rememberScrollState()
 
@@ -73,8 +73,8 @@ fun FinishPeriod(
                     WholeBudgetCard(
                         budget = wholeBudget,
                         currency = spendsViewModel.currency.value!!,
-                        startDate = spendsViewModel.startDate.value!!,
-                        finishDate = spendsViewModel.finishDate.value!!,
+                        startDate = spendsViewModel.startPeriodDate.value!!,
+                        finishDate = spendsViewModel.finishPeriodDate.value!!,
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     if (spends.isNotEmpty()) {
@@ -121,8 +121,8 @@ fun FinishPeriod(
                             modifier = Modifier.fillMaxWidth(),
                             budget = wholeBudget,
                             spends = spends,
-                            startDate = spendsViewModel.startDate.value!!,
-                            finishDate = spendsViewModel.finishDate.value!!,
+                            startDate = spendsViewModel.startPeriodDate.value!!,
+                            finishDate = spendsViewModel.finishPeriodDate.value!!,
                             currency = spendsViewModel.currency.value!!,
                         )
                         Spacer(modifier = Modifier.height(16.dp))
@@ -164,7 +164,7 @@ fun FinishPeriod(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Footer(
     modifier: Modifier = Modifier,
@@ -206,13 +206,13 @@ fun Footer(
         if (targetState && !initialState) {
             fadeIn(
                 tween(durationMillis = 250)
-            ) with fadeOut(
+            ) togetherWith fadeOut(
                 snap(delayMillis = 250)
             )
         } else {
             fadeIn(
                 snap()
-            ) with fadeOut(
+            ) togetherWith fadeOut(
                 tween(durationMillis = 250)
             )
         }.using(

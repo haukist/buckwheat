@@ -9,6 +9,7 @@
     <string name="new_daily_budget">Новы дзённы бюджэт</string>
     <string name="new_daily_budget_description">Сёння вы выйшлі за рамкі дзённага бюджэту, не хвалюйцеся, гэта не страшна. На наступныя дні бюджэт будзе пералічаны з улікам агульнага бюджэту, які застаўся</string>
     <string name="budget_end">Бюджэт скончыўся</string>
+    <string name="budget_not_set">Бюджэт не ўстаноўлены</string>
     <string name="budget_end_description">Вы выйшлі за рамкі запланаванага бюджэту, не хвалюйцеся, гэта не страшна, марнаванні ніколі не бываюць аднолькавымі. Заводзіце марнаванні далей, каб разумець колькі ў выніку вы выдаткуеце і які бюджэт вам патрэбен</string>
     <string name="new_spent">Новае марнаванне</string>
     <plurals name="spends_today">
@@ -35,6 +36,8 @@
     <string name="total_per_day">Дзённы вынік:</string>
 
     <!-- Wallet -->
+    <string name="change_date">Змяніць дату</string>
+    <string name="change_time">Змяніць час</string>
     <string name="wallet_title">Бюджэт</string>
     <string name="wallet_edit_title">Новы бюджэт</string>
     <string name="label_budget">Бюджэт</string>
@@ -44,10 +47,10 @@
         <item quantity="few">Да %1$s (%2$s дня)</item>
         <item quantity="many">Да %1$s (%2$s дзён)</item>
     </plurals>
-    <plurals name="finish_date">
-        <item quantity="one">%1$s (%2$s дзень)</item>
-        <item quantity="few">%1$s (%2$s дня)</item>
-        <item quantity="many">%1$s (%2$s дзён)</item>
+    <plurals name="days_count">
+        <item quantity="one">%1$s дзень</item>
+        <item quantity="few">%1$s дня</item>
+        <item quantity="many">%1$s дзён</item>
     </plurals>
     <string name="export_to_csv">Выгрузіць у CSV</string>
     <string name="finish_date_not_select">Дата заканчэння не выбрана</string>
@@ -144,6 +147,7 @@
     <string name="today">Сёння</string>
     <string name="export_to_csv_success">Выдаткі экспартаваны</string>
     <string name="export_to_csv_failed">Не ўдалося экспартаваць марнаванні</string>
+    <string name="add_spent">Дадаць марнаванне</string>
     <string name="remember_choice_reacalc_budget_description">Пазней вы можаце змяніцца ў кашальку</string>
     <string name="remember_choice">Памятайце выбар</string>
     <string name="rest_label">Рэшта</string>
@@ -158,4 +162,13 @@
     <string name="edit_spent">Рэдагуемае марнаванне</string>
     <string name="cancel_editing">Адмяніць рэдагаванне</string>
     <string name="over">больш за</string>
+    <string name="app_widget_extend_name">Грэчка падоўжыць</string>
+    <string name="app_widget_minimal_name">Грэчкі мінімум</string>
+    <string name="add_spent_short">Марнаванне</string>
+    <string name="home_widgets_label">Віджэты на галоўным экране</string>
+    <string name="try_home_widgets_desc">У грэцыцы цяпер ёсць віджэты. Паспрабуйце і старайцеся кантраляваць свой бюджэт з галоўнага экрана</string>
+    <string name="tutorial_open_wallet">Націсніце, каб паглядзець дэталі бюджэту</string>
+    <string name="tutorial_open_history">Пацягніце, каб прагледзець гісторыю марнаванняў</string>
+    <string name="recalc_budget_on_last_day">Сёння апошні дзень, размяркоўваць няма сэнсу</string>
+    <string name="start_last_day_description">Сёння можна выдаткаваць %1$s</string>
 </resources>

@@ -10,9 +10,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.danilkinkin.buckwheat.data.AppViewModel
+import com.danilkinkin.buckwheat.data.ExtendCurrency
 import com.danilkinkin.buckwheat.data.SpendsViewModel
 import com.danilkinkin.buckwheat.util.*
 import kotlinx.coroutines.runBlocking
+import java.math.BigDecimal
 
 class FocusController {
     var onFocus: MutableState<(() -> Unit)?> = mutableStateOf(null)
@@ -33,12 +35,13 @@ fun CurrentSpendEditor(
     focusController: FocusController = remember { FocusController() },
     spendsViewModel: SpendsViewModel = hiltViewModel(),
     appViewModel: AppViewModel = hiltViewModel(),
+    editorViewModel: EditorViewModel = hiltViewModel(),
 ) {
     val localDensity = LocalDensity.current
     val focusManager = LocalFocusManager.current
 
     val currency by spendsViewModel.currency.observeAsState(ExtendCurrency.none())
-    val mode by spendsViewModel.mode.observeAsState(SpendsViewModel.Mode.ADD)
+    val mode by editorViewModel.mode.observeAsState(EditMode.ADD)
 
     var spentValue by remember { mutableStateOf("0") }
     var stage by remember { mutableStateOf(AnimState.IDLE) }
@@ -48,7 +51,7 @@ fun CurrentSpendEditor(
     val focusRequester = remember { FocusRequester() }
 
     fun calculateValues() {
-        spentValue = spendsViewModel.rawSpentValue.value!!
+        spentValue = editorViewModel.rawSpentValue.value!!
         requestFocus = true
     }
 
@@ -57,7 +60,7 @@ fun CurrentSpendEditor(
             requestFocus = true
             hide = false
         } else {
-            hide = spendsViewModel.rawSpentValue.value!! == ""
+            hide = editorViewModel.rawSpentValue.value!! == ""
         }
     }
 
@@ -69,25 +72,25 @@ fun CurrentSpendEditor(
         calculateValues()
     }
 
-    observeLiveData(spendsViewModel.stage) {
+    observeLiveData(editorViewModel.stage) {
         when (it) {
-            SpendsViewModel.Stage.IDLE -> {
+            EditStage.IDLE -> {
                 if (currState === AnimState.EDITING) {
                     stage = AnimState.RESET
                 }
                 calculateValues()
             }
-            SpendsViewModel.Stage.CREATING_SPENT -> {
+            EditStage.CREATING_SPENT -> {
                 calculateValues()
 
                 stage = AnimState.EDITING
             }
-            SpendsViewModel.Stage.EDIT_SPENT -> {
+            EditStage.EDIT_SPENT -> {
                 calculateValues()
 
                 stage = AnimState.EDITING
             }
-            SpendsViewModel.Stage.COMMITTING_SPENT -> {
+            EditStage.COMMITTING_SPENT -> {
                 stage = AnimState.COMMIT
             }
         }
@@ -101,8 +104,8 @@ fun CurrentSpendEditor(
                 requestFocus = true
                 calculateValues()
 
-                spendsViewModel.createSpent()
-                spendsViewModel.editSpent(0.toBigDecimal())
+                editorViewModel.startCreatingSpent()
+                editorViewModel.modifyEditingSpent(BigDecimal.ZERO)
             }
         }
         focusController.onBlur.value = {
@@ -122,12 +125,12 @@ fun CurrentSpendEditor(
                         val fixed = fixedNumberString(it)
                         val converted = tryConvertStringToNumber(fixed)
 
-                        spendsViewModel.rawSpentValue.value = fixed
-                        spendsViewModel.editSpent(converted.join().toBigDecimal())
+                        editorViewModel.rawSpentValue.value = fixed
+                        editorViewModel.modifyEditingSpent(converted.join().toBigDecimal())
 
                         if (fixed === "") {
-                            if (mode === SpendsViewModel.Mode.ADD) runBlocking {
-                                spendsViewModel.resetSpent()
+                            if (mode === EditMode.ADD) runBlocking {
+                                editorViewModel.resetEditingSpent()
                             }
                         }
                     },

@@ -1,31 +1,45 @@
 package com.danilkinkin.buckwheat.finishPeriod
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import com.danilkinkin.buckwheat.R
+import com.danilkinkin.buckwheat.data.ExtendCurrency
 import com.danilkinkin.buckwheat.data.entities.Spent
-import com.danilkinkin.buckwheat.util.*
+import com.danilkinkin.buckwheat.ui.BuckwheatTheme
+import com.danilkinkin.buckwheat.ui.colorBad
+import com.danilkinkin.buckwheat.ui.colorGood
+import com.danilkinkin.buckwheat.ui.colorNotGood
+import com.danilkinkin.buckwheat.util.countDays
+import com.danilkinkin.buckwheat.util.harmonize
+import com.danilkinkin.buckwheat.util.isSameDay
+import com.danilkinkin.buckwheat.util.numberFormat
+import com.danilkinkin.buckwheat.util.prettyDate
+import com.danilkinkin.buckwheat.util.toDate
+import com.danilkinkin.buckwheat.util.toPalette
 import java.math.BigDecimal
 import java.math.RoundingMode
-import com.danilkinkin.buckwheat.R
-import com.danilkinkin.buckwheat.ui.*
 import java.time.LocalDate
-import java.util.*
+import java.util.Date
 
-@OptIn(ExperimentalUnitApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun OverspendingInfoCard(
     modifier: Modifier = Modifier,
@@ -129,7 +143,7 @@ fun OverspendingInfoCard(
                     Text(
                         text = stringResource(
                             R.string.overspending_value,
-                            prettyCandyCanes(
+                            numberFormat(
                                 overspendingDays.first().spending - spentPerDay,
                                 currency = currency,
                             ),
@@ -169,7 +183,7 @@ fun OverspendingInfoCard(
                                 String.format(
                                     stringResource(R.string.overspending_after_few_times_out_budget),
                                     String.format(
-                                        pluralStringResource(R.plurals.day, count = overspendingDays.size - 1),
+                                        pluralStringResource(R.plurals.days_count, count = overspendingDays.size - 1),
                                         overspendingDays.size - 1,
                                     ),
                                     restDays,
@@ -185,7 +199,7 @@ fun OverspendingInfoCard(
                                 String.format(
                                     stringResource(R.string.overspending_after_many_times_out_budget),
                                     String.format(
-                                        pluralStringResource(R.plurals.day, count = restDays - overspendingDays.size),
+                                        pluralStringResource(R.plurals.days_count, count = restDays - overspendingDays.size),
                                         restDays - overspendingDays.size,
                                     ),
                                     restDays,
@@ -223,7 +237,7 @@ private fun PreviewZero() {
                 Spent(value = BigDecimal(5), date = LocalDate.now().minusDays(1).toDate()),
                 Spent(value = BigDecimal(8), date = Date()),
             ),
-            currency = ExtendCurrency(type = CurrencyType.NONE),
+            currency = ExtendCurrency.none(),
             startDate = LocalDate.now().minusDays(7).toDate(),
             finishDate = LocalDate.now().plusDays(3).toDate(),
         )
@@ -241,7 +255,7 @@ private fun PreviewOne() {
                 Spent(value = BigDecimal(15), date = Date()),
                 Spent(value = BigDecimal(42), date = Date()),
             ),
-            currency = ExtendCurrency(type = CurrencyType.NONE),
+            currency = ExtendCurrency.none(),
             startDate = LocalDate.now().minusDays(7).toDate(),
             finishDate = LocalDate.now().plusDays(3).toDate(),
         )
@@ -262,7 +276,7 @@ private fun PreviewFew() {
                 Spent(value = BigDecimal(15), date = Date()),
                 Spent(value = BigDecimal(42), date = Date()),
             ),
-            currency = ExtendCurrency(type = CurrencyType.NONE),
+            currency = ExtendCurrency.none(),
             startDate = LocalDate.now().minusDays(10).toDate(),
             finishDate = Date(),
         )
@@ -286,7 +300,7 @@ private fun PreviewMany() {
                 Spent(value = BigDecimal(15), date = Date()),
                 Spent(value = BigDecimal(42), date = Date()),
             ),
-            currency = ExtendCurrency(type = CurrencyType.NONE),
+            currency = ExtendCurrency.none(),
             startDate = LocalDate.now().minusDays(7).toDate(),
             finishDate = LocalDate.now().plusDays(3).toDate(),
         )
@@ -310,7 +324,7 @@ private fun PreviewAll() {
                 Spent(value = BigDecimal(15), date = Date()),
                 Spent(value = BigDecimal(42), date = Date()),
             ),
-            currency = ExtendCurrency(type = CurrencyType.NONE),
+            currency = ExtendCurrency.none(),
             startDate = LocalDate.now().minusDays(9).toDate(),
             finishDate = LocalDate.now().plusDays(1).toDate(),
         )
@@ -328,7 +342,7 @@ private fun PreviewNightMode() {
                 Spent(value = BigDecimal(15), date = Date()),
                 Spent(value = BigDecimal(42), date = Date()),
             ),
-            currency = ExtendCurrency(type = CurrencyType.NONE),
+            currency = ExtendCurrency.none(),
             startDate = LocalDate.now().minusDays(7).toDate(),
             finishDate = LocalDate.now().plusDays(3).toDate(),
         )

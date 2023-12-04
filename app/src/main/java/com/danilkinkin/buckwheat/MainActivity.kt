@@ -16,6 +16,9 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.lifecycleScope
+import com.danilkinkin.buckwheat.base.balloon.BalloonProvider
+import com.danilkinkin.buckwheat.data.dao.StorageDao
+import com.danilkinkin.buckwheat.di.migrateToDataStore
 import com.danilkinkin.buckwheat.home.MainScreen
 import dagger.hilt.android.AndroidEntryPoint
 import com.danilkinkin.buckwheat.ui.BuckwheatTheme
@@ -26,15 +29,23 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import syncOverrideLocale
 import java.util.*
+import javax.inject.Inject
 
-val Context.dataStore by preferencesDataStore("settings")
+val Context.budgetDataStore by preferencesDataStore("budget")
+val Context.settingsDataStore by preferencesDataStore("settings")
 var Context.appTheme by mutableStateOf(ThemeMode.SYSTEM)
 var Context.appLocale: Locale? by mutableStateOf(null)
 var Context.systemLocale: Locale? by mutableStateOf(null)
 
+val LocalWindowSize = compositionLocalOf { WindowWidthSizeClass.Compact }
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val isDone: MutableState<Boolean> = mutableStateOf(false)
+
+    //TODO: Remove after 01.01.2024. Need for migration to DataStore
+    @Inject
+    lateinit var storageDao: StorageDao
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,7 +53,7 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         installSplashScreen().setKeepOnScreenCondition { !isDone.value }
         lifecycleScope.launch {
-            context.dataStore.data.first()
+            context.settingsDataStore.data.first()
         }
 
         super.onCreate(savedInstanceState)
@@ -54,6 +65,7 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(Unit) {
                 syncTheme(localContext)
                 syncOverrideLocale(localContext)
+                migrateToDataStore(context, storageDao)
 
                 isDone.value = true
             }
@@ -67,7 +79,13 @@ class MainActivity : ComponentActivity() {
             if (isDone.value) {
                 BuckwheatTheme {
                     OverrideLocalize {
-                        MainScreen(widthSizeClass, activityResultRegistryOwner)
+                        BalloonProvider {
+                            CompositionLocalProvider(
+                                LocalWindowSize provides widthSizeClass
+                            ) {
+                                MainScreen(activityResultRegistryOwner)
+                            }
+                        }
                     }
                 }
             }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -29,6 +30,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.danilkinkin.buckwheat.R
 import com.danilkinkin.buckwheat.base.ButtonRow
 import com.danilkinkin.buckwheat.data.AppViewModel
+import com.danilkinkin.buckwheat.data.ExtendCurrency
 import com.danilkinkin.buckwheat.data.PathState
 import com.danilkinkin.buckwheat.data.SpendsViewModel
 import com.danilkinkin.buckwheat.util.*
@@ -48,9 +50,15 @@ fun BudgetConstructor(
 ) {
     val haptic = LocalHapticFeedback.current
 
+    val budget by spendsViewModel.budget.observeAsState(BigDecimal.ZERO)
+    val spent by spendsViewModel.spent.observeAsState(BigDecimal.ZERO)
+    val spentFromDailyBudget by spendsViewModel.spentFromDailyBudget.observeAsState(BigDecimal.ZERO)
+    val startPeriodDate by spendsViewModel.startPeriodDate.observeAsState(Date())
+    val finishPeriodDate by spendsViewModel.finishPeriodDate.observeAsState(Date())
+
     var rawBudget by remember {
         val restBudget =
-            (spendsViewModel.budget.value!! - spendsViewModel.spent.value!! - spendsViewModel.spentFromDailyBudget.value!!)
+            (budget - spent - spentFromDailyBudget)
                 .setScale(2, RoundingMode.HALF_UP)
                 .stripTrailingZeros()
                 .toPlainString()
@@ -63,24 +71,23 @@ fun BudgetConstructor(
 
         mutableStateOf(converted.first + converted.second)
     }
-    var budget by remember {
+    var budgetCache by remember {
         val restBudget =
-            (spendsViewModel.budget.value!! - spendsViewModel.spent.value!! - spendsViewModel.spentFromDailyBudget.value!!)
+            (budget - spent - spentFromDailyBudget)
                 .setScale(2, RoundingMode.HALF_UP)
                 .stripTrailingZeros()
                 .toPlainString()
 
         mutableStateOf(BigDecimal(restBudget))
     }
-    val dateToValue = remember { mutableStateOf(spendsViewModel.finishDate.value) }
+    val dateToValue = remember { mutableStateOf(spendsViewModel.finishPeriodDate.value) }
     var showUseSuggestion by remember {
-        val useBudget = budget != spendsViewModel.budget.value!!
-                && spendsViewModel.budget.value!! != BigDecimal(0)
+        val useBudget = budget != budgetCache && !budget.isZero()
 
-        val length = if (spendsViewModel.finishDate.value !== null) {
+        val length = if (finishPeriodDate !== null) {
             countDays(
-                spendsViewModel.finishDate.value!!,
-                spendsViewModel.startDate.value!!,
+                finishPeriodDate!!,
+                startPeriodDate,
             )
         } else {
             0
@@ -88,9 +95,9 @@ fun BudgetConstructor(
         val finishDate = LocalDate.now().plusDays(length.toLong() - 1).toDate()
 
         val useDate = length != 0
-                && (spendsViewModel.finishDate.value == null || !isSameDay(
+                && (finishPeriodDate == null || !isSameDay(
             finishDate.time,
-            spendsViewModel.finishDate.value!!.time
+            finishPeriodDate!!.time
         ))
 
         mutableStateOf(
@@ -101,32 +108,32 @@ fun BudgetConstructor(
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Column {
-        val days = if (dateToValue.value != null) countDays(dateToValue.value!!) else 0
+        val days = if (dateToValue.value != null) countDaysToToday(dateToValue.value!!) else 0
 
         UseLastSuggestionChip(
             visible = showUseSuggestion,
             onClick = {
                 rawBudget =
-                    if (!spendsViewModel.budget.value!!.isZero()) {
-                        tryConvertStringToNumber(spendsViewModel.budget.value!!.toString()).join(
+                    if (!budget.isZero()) {
+                        tryConvertStringToNumber(budget.toString()).join(
                             third = false
                         )
                     } else {
                         Triple("", "0", "").join(third = false)
                     }
 
-                budget = spendsViewModel.budget.value!!
+                budgetCache = budget
 
                 val length = countDays(
-                    spendsViewModel.finishDate.value!!,
-                    spendsViewModel.startDate.value!!,
+                    finishPeriodDate!!,
+                    startPeriodDate,
                 )
                 val finishDate = LocalDate.now().plusDays(length.toLong() - 1).toDate()
 
                 dateToValue.value = finishDate
 
                 onChange(
-                    budget,
+                    budgetCache,
                     finishDate,
                 )
 
@@ -143,16 +150,16 @@ fun BudgetConstructor(
                 val converted = tryConvertStringToNumber(it)
 
                 rawBudget = converted.join(third = false)
-                budget = converted.join().toBigDecimal()
+                budgetCache = converted.join().toBigDecimal()
 
-                onChange(budget, dateToValue.value)
+                onChange(budgetCache, dateToValue.value)
             },
             textStyle = MaterialTheme.typography.displayLarge.copy(
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
             ),
             visualTransformation = visualTransformationAsCurrency(
-                currency = ExtendCurrency(type = CurrencyType.NONE),
+                currency = ExtendCurrency.none(),
                 hintColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
             ),
             keyboardOptions = KeyboardOptions(
@@ -206,7 +213,7 @@ fun BudgetConstructor(
 
                         dateToValue.value = result["finishDate"] as Date
 
-                        onChange(budget, dateToValue.value)
+                        onChange(budgetCache, dateToValue.value)
                     }
                 ))
             },
@@ -214,7 +221,6 @@ fun BudgetConstructor(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UseLastSuggestionChip(
     visible: Boolean,
